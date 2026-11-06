@@ -1,46 +1,279 @@
-# React Native / Expo Starter Structure
+# React Native Architecture Starter
 
-This is a **source-folder structure template**, not a standalone Expo project. It does not include `package.json` or installed dependencies.
 
-## How to use it
 
-1. Create a real Expo project with Expo Router:
-   ```bash
-   npx create-expo-app@latest my-app
-   ```
-2. Open the created project.
-3. Copy this template's `src/` folder into the project (merge/replace the generated `src/` only if you are sure you do not need its starter files).
-4. From the project folder, install dependencies if needed and run:
-   ```bash
-   npx expo start
-   ```
+هاد المشروع هو قالب بنستخدمه لننظم مشاريع React Native باستخدام Expo Router وTypeScript.
 
-The Expo project provides React, React Native, Expo Router, TypeScript configuration, and the `react/jsx-runtime` module that the editor needs.
+الفكرة منه بسيطة: بدل ما نحط كل ملفات المشروع بمكان واحد، منقسم المشروع لمجلدات، وكل مجلد إله وظيفة محددة.
 
-## Structure
+هيك بيصير المشروع أسهل بالفهم والتعديل والتطوير، خصوصاً لما يكبر ويصير فيه شاشات وميزات كتيرة.
+
+
+---
+
+## 1. كيف قسمنا المشروع؟
 
 ```text
 src/
-├── app/          # Expo Router routes and root layout
-├── features/     # App features; each feature owns its screens and feature-specific code
-├── components/   # Shared UI components used by multiple features
-├── services/     # Shared API client and storage utilities
-├── constants/    # Shared fixed values: colors, spacing, typography
-├── assets/       # Images, icons, fonts
-├── providers/    # App-wide state/context providers
-├── utils/        # General-purpose helper functions
-└── types/        # Shared TypeScript types
+│
+├── app/
+├── assets/
+├── components/
+├── constants/
+├── features/
+├── hooks/
+├── i18n/
+├── providers/
+├── services/
+├── types/
+└── utils/
 ```
 
-## Where things go
 
-- A route belongs in `src/app/`.
-- `src/app/_layout.tsx` defines the root navigation layout.
-- The actual screen UI belongs in `src/features/<feature>/screens/`.
-- Components used only by one feature stay inside that feature.
-- Reusable components shared by different features go in `src/components/`.
-- Feature-specific API operations stay inside that feature (for example `src/features/auth/auth.service.ts`).
-- Shared API setup and device storage go in `src/services/`.
-- Create folders only when the project needs them. You do not need to fill every folder on day one.
 
-`.gitkeep` files are empty placeholders that make Git retain otherwise-empty folders. They are not application code and can be deleted once a folder contains real files.
+## 2. شرح المجلدات
+
+### 📁 app
+
+هاد المجلد مسؤول عن التنقل بين شاشات التطبيق (Navigation).
+
+نحن عم نستخدم Expo Router، وهو بيعتمد على الملفات الموجودة داخل `app` لتحديد مسارات الصفحات.
+
+- `index.tsx`: الصفحة الرئيسية للمسار `/`.
+- `_layout.tsx`: إعداد التنقل بين الصفحات، مثل Stack أو Tabs، وإعدادات مشتركة للمسارات.
+
+**ليش ما منحط تصميم كل الشاشات هون؟**
+
+لأننا بدنا نفصل بين التنقل وتصميم الشاشة نفسها.
+
+ملفات التنقل بتكون هون، أما تصميم الشاشة ومنطقها فبيكون داخل الـ Feature التابعة إلها.
+
+### 📁 features
+
+هاد أهم مجلد تقريباً بالبنية.
+
+كل Feature معناها ميزة أو قسم من التطبيق.
+
+مثلاً:
+- auth: تسجيل الدخول وإنشاء الحساب.
+- profile: الملف الشخصي.
+- products: المنتجات.
+
+كل ميزة بتحتوي الملفات الخاصة فيها، حتى ما تتداخل مع باقي الميزات.
+
+حالياً عنا:
+
+```text
+features/
+└── auth/
+    ├── components/
+    ├── constants/
+    ├── interfaces/
+    ├── screens/
+    └── utils/
+```
+
+وظيفة كل مجلد:
+
+- `components`: عناصر واجهة خاصة بميزة تسجيل الدخول، مثل LoginForm.
+- `constants`: قيم ثابتة خاصة بالميزة.
+- `interfaces`: تعريف شكل البيانات باستخدام TypeScript، مثل بيانات تسجيل الدخول والمستخدم.
+- `screens`: الشاشات الخاصة بالميزة، مثل LoginScreen وRegisterScreen.
+- `utils`: دوال مساعدة خاصة بالميزة.
+
+**مثال:** إذا عندنا شاشة تسجيل دخول، تصميمها بيكون داخل `screens`، وإذا فيها نموذج خاص فيها ممكن نحطه داخل `components`.
+
+أما إذا عنا زر عام منستخدمه بكل التطبيق، ما منكرره هون، منحطه داخل `components` الرئيسي.
+
+### 📁 components
+
+هون منحط عناصر الواجهة المشتركة (Shared Components)، يعني العناصر اللي ممكن نستخدمها بأكثر من شاشة أو Feature.
+
+مثلاً:
+- CustomButton
+- CustomInput
+- LoadingIndicator
+- CustomModal
+
+القاعدة بسيطة:
+
+إذا العنصر خاص بميزة واحدة، منحطه داخلها.
+
+إذا مشترك بين عدة ميزات، منحطه هون.
+
+### 📁 constants
+
+هون منحط القيم الثابتة اللي منحتاجها بأكثر من مكان بالتطبيق.
+
+مثلاً:
+- ألوان التطبيق.
+- أحجام الخطوط.
+- المسافات.
+- قيم وإعدادات ثابتة.
+
+الهدف إننا ما نكرر نفس القيم بكل شاشة، وإذا بدنا نغير لون أو قيمة منقدر نعدلها من مكان واحد.
+
+### 📁 assets
+
+هاد المجلد للملفات اللي منستخدمها داخل الواجهات.
+
+قسمناه إلى:
+
+- `fonts`: ملفات الخطوط.
+- `icons`: الأيقونات.
+- `images`: الصور والرسومات.
+
+### 📁 hooks
+
+هون منحط الـ Custom Hooks اللي منكتبها نحن.
+
+طيب شو هو Hook؟
+
+هو دالة خاصة بـ React بتسمح لنا نستخدم ميزات React، مثل إدارة الحالة ومتابعة التغييرات.
+
+في Hooks جاهزة من React، مثل:
+
+- `useState`: لتخزين قيمة ممكن تتغير.
+- `useEffect`: لتنفيذ عملية عند حدوث تغيير معين.
+- `useContext`: للوصول إلى بيانات مشتركة.
+
+أما الـ Custom Hooks فهي دوال منكتبها نحن حتى نعيد استخدام منطق معين بأكثر من مكان.
+
+مثلاً:
+- `useAuth`: للتعامل مع حالة تسجيل الدخول.
+- `useDebounce`: لتأخير تنفيذ البحث.
+- `useNetworkStatus`: لمعرفة حالة الاتصال بالإنترنت.
+
+**ملاحظة:** مو كل Hook لازم يكون هون. إذا كان خاص بميزة معينة، ممكن نحطه داخل الـ Feature نفسها.
+
+### 📁 i18n
+
+اختصار لـ Internationalization، يعني تجهيز التطبيق ليدعم أكثر من لغة.
+
+حالياً جهزنا هالبنية:
+
+```text
+i18n/
+└── locales/
+    ├── ar.json
+    └── en.json
+```
+
+- `ar.json`: النصوص العربية.
+- `en.json`: النصوص الإنجليزية.
+- `locales`: المجلد اللي بيجمع ملفات اللغات.
+
+الفكرة إننا نخلي نصوص التطبيق بملفات منفصلة بدل ما نكتبها مباشرة داخل الشاشات.
+
+هيك منقدر نغير اللغة بدون ما نعدل كل شاشة لحالها.
+
+لسا ما ركبنا نظام الترجمة نفسه، نحن حالياً جهزنا المجلدات والملفات فقط.
+
+وكمان لازم ننتبه إن العربية اتجاهها من اليمين لليسار (RTL)، والإنجليزية من اليسار لليمين (LTR).
+
+### 📁 providers
+
+هون منحط الـ Providers اللي بتوفر بيانات أو إعدادات مشتركة لأجزاء التطبيق.
+
+مثلاً:
+- AuthProvider: لمشاركة حالة تسجيل الدخول.
+- ThemeProvider: لمشاركة إعدادات الثيم.
+- LanguageProvider: لمشاركة اللغة الحالية.
+
+بدل ما نمرر نفس البيانات بين مكونات كتيرة، منقدر نوفرها من مكان مشترك.
+
+### 📁 services
+
+هون منحط الخدمات اللي بتتعامل مع أشياء خارج واجهة التطبيق.
+
+مثلاً:
+- الاتصال بالـ API.
+- إعداد Axios.
+- التعامل مع التخزين المحلي.
+- إرسال واستقبال البيانات من السيرفر.
+
+إذا العملية خاصة بميزة واحدة، ممكن تكون داخل الـ Feature نفسها.
+
+أما الإعدادات والخدمات المشتركة، فمنحطها هون.
+
+### 📁 types
+
+هون منحط تعريفات أنواع البيانات المشتركة باستخدام TypeScript.
+
+مثلاً:
+- نوع بيانات المستخدم.
+- نوع استجابة الـ API.
+- أنواع بيانات مشتركة بين عدة Features.
+
+
+### 📁 utils
+
+هون منحط الدوال المساعدة العامة اللي ممكن نستخدمها بأكثر من مكان.
+
+مثلاً:
+- تنسيق التاريخ.
+- التحقق من البريد الإلكتروني.
+- تنسيق الأرقام.
+- تحويل النصوص.
+
+الفرق بينها وبين `hooks`:
+
+- `utils`: دوال عادية ما بتحتاج ميزات React.
+- `hooks`: دوال بتستخدم ميزات React Hooks.
+
+---
+
+
+## 4. كيف منستخدم القالب؟
+
+
+
+```bash
+npx create-expo-app@latest my-app
+```
+
+بعدها مننسخ مجلد `src` الموجود بهالقالب إلى المشروع الجديد.
+
+ومن داخل مجلد المشروع الجديد منشغّل:
+
+```bash
+npx expo start
+```
+
+
+## كيف أرفع تعديلاتي على GitHub؟
+
+كل ما أعمل أي تعديل على المشروع وبدي أرفعه على GitHub، بفتح Terminal داخل مجلد المشروع وبنفّذ الخطوات التالية بالترتيب:
+
+### 1. التأكد من التعديلات
+```bash
+git status
+```
+بيعرضلي الملفات اللي تعدّلت أو انضافت أو انحذفت.
+
+### 2. تجهيز التعديلات للرفع
+```bash
+git add .
+```
+بيجهّز كل التعديلات والملفات الجديدة للـ Commit.
+
+### 3. حفظ التعديلات
+```bash
+git commit -m "وصف مختصر للتعديل"
+```
+بيحفظ التعديلات ضمن نسخة جديدة، ولازم أغيّر الوصف حسب طبيعة التعديل.
+
+
+### 4. رفع التعديلات على GitHub
+```bash
+git push
+```
+بيرفع آخر Commit على المستودع الموجود على GitHub.
+
+### الأوامر السريعة
+
+```bash
+git add .
+git commit -m "Describe your changes"
+git push
+```
